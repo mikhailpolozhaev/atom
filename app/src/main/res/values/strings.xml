@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Atom</string>
+    <string name="title_item_detail">Item Detail</string>
+    <string name="production_companies">Production Companies</string>
+    <string name="popularity">Popularity</string>
+    <string name="budget">Budget</string>
+    <string name="status">Status</string>
+    <string name="spoken_languages">Spoken Languages</string>
+    <string name="title">Title</string>
+</resources>
