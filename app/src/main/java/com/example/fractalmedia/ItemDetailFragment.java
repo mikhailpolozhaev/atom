@@ -15,7 +15,7 @@ import com.example.fractalmedia.model.Genres;
 import com.example.fractalmedia.model.Languages;
 import com.example.fractalmedia.model.Movie;
 import com.example.fractalmedia.retrofit.ApiClient;
-import com.example.fractalmedia.retrofit.TMDBService;
+import com.example.fractalmedia.services.TMDBService;
 import com.squareup.picasso.Picasso;
 
 import butterknife.BindView;
@@ -80,7 +80,7 @@ public class ItemDetailFragment extends Fragment {
                     mItem = response.body();
 
                     Picasso.get()
-                            .load("https://image.tmdb.org/t/p/original" + mItem.getBackdropPath())
+                            .load(ApiClient.URL_IMG + mItem.getBackdropPath())
                             .into(imagen);
                     titleTextView.setText(mItem.getTitle());
                     detailTextView.setText(mItem.getOverview());
@@ -111,9 +111,7 @@ public class ItemDetailFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.item_detail, container, false);
-
         unbinder = ButterKnife.bind(this, rootView);
-
         return rootView;
     }
 

@@ -1,4 +1,4 @@
-package com.example.fractalmedia.retrofit;
+package com.example.fractalmedia.services;
 
 import com.example.fractalmedia.model.Movie;
 import com.example.fractalmedia.model.MoviesResponse;

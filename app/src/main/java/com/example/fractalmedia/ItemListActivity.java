@@ -18,7 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.fractalmedia.model.Movies;
 import com.example.fractalmedia.model.MoviesResponse;
 import com.example.fractalmedia.retrofit.ApiClient;
-import com.example.fractalmedia.retrofit.TMDBService;
+import com.example.fractalmedia.services.TMDBService;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -111,7 +111,6 @@ public class ItemListActivity extends AppCompatActivity {
                     Intent intent = new Intent(context, ItemDetailActivity.class);
                     intent.putExtra(ItemDetailFragment.ARG_ITEM_ID, item.getId().toString());
                     intent.putExtra(ItemDetailFragment.ARG_ITEM_TITLE, item.getTitle());
-
                     context.startActivity(intent);
                 }
             }
@@ -137,7 +136,7 @@ public class ItemListActivity extends AppCompatActivity {
             holder.mIdView.setText(mValues.get(position).getTitle());
             holder.mContentView.setText(mValues.get(position).getOverview());
             Picasso.get()
-                    .load("https://image.tmdb.org/t/p/original" + mValues.get(position).getBackdropPath())
+                    .load(ApiClient.URL_IMG + mValues.get(position).getBackdropPath())
                     .into(holder.imageView);
             holder.itemView.setTag(mValues.get(position));
             holder.itemView.setOnClickListener(mOnClickListener);
@@ -158,7 +157,6 @@ public class ItemListActivity extends AppCompatActivity {
                 imageView = (ImageView) view.findViewById(R.id.imageId);
                 mIdView = (TextView) view.findViewById(R.id.id_text);
                 mContentView = (TextView) view.findViewById(R.id.content);
-
             }
         }
     }
