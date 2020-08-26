@@ -23,7 +23,7 @@ public class Genres {
         this.name = name;
     }
 
-    public static String getGenresWithDelimiter(List<Genres> list, final String separation) {
+    public static String convertListToCommaValues(List<Genres> list, final String separation) {
         if (list == null || list.isEmpty()) {
             return "";
         }

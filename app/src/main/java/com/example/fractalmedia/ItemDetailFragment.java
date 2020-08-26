@@ -85,15 +85,15 @@ public class ItemDetailFragment extends Fragment {
                     titleTextView.setText(mItem.getTitle());
                     detailTextView.setText(mItem.getOverview());
                     popularityTextView.setText(String.valueOf(mItem.getPopularity()));
-                    genresTextView.setText(Genres.getGenresWithDelimiter(mItem.getGenres(),
+                    genresTextView.setText(Genres.convertListToCommaValues(mItem.getGenres(),
                             SEPARATOR));
                     budgetTextView.setText(String.valueOf(mItem.getBudget()));
                     statusTextView.setText(mItem.getStatus());
                     languageTextView.setText(
-                            Languages.getLanguagesWithDelimiter(mItem.getSpokenLanguages(), SEPARATOR)
+                            Languages.convertListToCommaValues(mItem.getSpokenLanguages(), SEPARATOR)
                     );
                     companiesTextView.setText(
-                            Companies.getCompaniesWithDelimiter(mItem.getProductionCompanies(),
+                            Companies.convertListToCommaValues(mItem.getProductionCompanies(),
                                     SEPARATOR)
                     );
                 }

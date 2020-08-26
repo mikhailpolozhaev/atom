@@ -17,7 +17,7 @@ public class MoviesResponse {
     @Expose
     private int totalPages;
 
-    private List<Movies> results;
+    private List<DetailsMovies> results;
 
     public int getPage() {
         return page;
@@ -43,11 +43,11 @@ public class MoviesResponse {
         this.totalPages = totalPages;
     }
 
-    public List<Movies> getResults() {
+    public List<DetailsMovies> getResults() {
         return results;
     }
 
-    public void setResults(List<Movies> results) {
+    public void setResults(List<DetailsMovies> results) {
         this.results = results;
     }
 
