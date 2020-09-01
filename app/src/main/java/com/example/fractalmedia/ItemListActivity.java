@@ -1,28 +1,23 @@
 package com.example.fractalmedia;
 
-import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.example.fractalmedia.model.Movies;
+import com.example.fractalmedia.adapter.CustomMoviesRecyclerViewAdapter;
 import com.example.fractalmedia.model.MoviesResponse;
 import com.example.fractalmedia.retrofit.ApiClient;
-import com.example.fractalmedia.retrofit.TMDBService;
-import com.squareup.picasso.Picasso;
+import com.example.fractalmedia.services.TMDBService;
 
-import java.util.List;
-
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -35,35 +30,69 @@ import retrofit2.Response;
  * item details. On tablets, the activity presents the list of items and
  * item details side-by-side using two vertical panes.
  */
-public class ItemListActivity extends AppCompatActivity {
-
-    /**
-     * Whether or not the activity is in two-pane mode, i.e. running on a tablet
-     * device.
-     */
-    private boolean mTwoPane;
+public class ItemListActivity extends AppCompatActivity
+        implements SwipeRefreshLayout.OnRefreshListener {
 
     private MoviesResponse moviesResponse;
+
+    private CustomMoviesRecyclerViewAdapter adapter;
+
+    private int currentPage = 1;
+    private boolean isLastPage = false;
+    private boolean isLoading = false;
+
+
+    @BindView(R.id.swipeRefresh)
+    SwipeRefreshLayout swipeRefresh;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_item_list);
-
+        ButterKnife.bind(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        toolbar.setTitle("ATOM");
 
-        if (findViewById(R.id.item_detail_container) != null) {
-            // The detail container view will be present only in the
-            // large-screen layouts (res/values-w900dp).
-            // If this view is present, then the
-            // activity should be in two-pane mode.
-            mTwoPane = true;
-        }
+        View recyclerView = findViewById(R.id.item_list);
+        setupRecyclerView((RecyclerView) recyclerView);
+    }
+
+    private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
+        swipeRefresh.setOnRefreshListener(this);
+        recyclerView.setHasFixedSize(true);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
+        adapter = new CustomMoviesRecyclerViewAdapter();
+        recyclerView.setAdapter(adapter);
+
+        loadData();
+
+        recyclerView.addOnScrollListener(new PaginationListener(layoutManager) {
+            @Override
+            protected void loadMoreItems() {
+                swipeRefresh.setRefreshing(true);
+                isLoading = true;
+                currentPage++;
+                loadData();
+            }
+
+            @Override
+            public boolean isLastPage() {
+                return isLastPage;
+            }
+
+            @Override
+            public boolean isLoading() {
+                return isLoading;
+            }
+        });
+
+    }
+
+    private void loadData() {
 
         TMDBService service = ApiClient.getClient().create(TMDBService.class);
-        Call<MoviesResponse> call = service.listPopularMovie(ApiClient.API_KEY);
+        Call<MoviesResponse> call = service.listPopularMovie(ApiClient.API_KEY, currentPage);
 
         call.enqueue(new Callback<MoviesResponse>() {
             @Override
@@ -71,95 +100,28 @@ public class ItemListActivity extends AppCompatActivity {
 
                 moviesResponse = response.body();
                 Log.e("ItemListFragment", "response: " + response.body().toString());
-                View recyclerView = findViewById(R.id.item_list);
-                setupRecyclerView((RecyclerView) recyclerView);
+                adapter.addItems(moviesResponse.getResults());
+                swipeRefresh.setRefreshing(false);
+                if (currentPage >= moviesResponse.getTotalPages()) {
+
+                    isLastPage = true;
+                }
+                isLoading = false;
             }
 
             @Override
             public void onFailure(Call<MoviesResponse> call, Throwable t) {
                 Log.e("ItemDetailFragment", "throwable: " + t.getMessage());
-
             }
         });
     }
 
-    private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
-        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(this, moviesResponse.getResults(), mTwoPane));
+    @Override
+    public void onRefresh() {
+        currentPage = 1;
+        isLastPage = false;
+        adapter.clear();
+        loadData();
     }
 
-    public static class SimpleItemRecyclerViewAdapter
-            extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
-
-        private final ItemListActivity mParentActivity;
-        private final List<Movies> mValues;
-        private final boolean mTwoPane;
-        private final View.OnClickListener mOnClickListener = new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Movies item = (Movies) view.getTag();
-                if (mTwoPane) {
-                    Bundle arguments = new Bundle();
-                    arguments.putString(ItemDetailFragment.ARG_ITEM_ID, item.getId().toString());
-                    arguments.putString(ItemDetailFragment.ARG_ITEM_TITLE, item.getTitle());
-                    ItemDetailFragment fragment = new ItemDetailFragment();
-                    fragment.setArguments(arguments);
-                    mParentActivity.getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.item_detail_container, fragment)
-                            .commit();
-                } else {
-                    Context context = view.getContext();
-                    Intent intent = new Intent(context, ItemDetailActivity.class);
-                    intent.putExtra(ItemDetailFragment.ARG_ITEM_ID, item.getId().toString());
-                    intent.putExtra(ItemDetailFragment.ARG_ITEM_TITLE, item.getTitle());
-
-                    context.startActivity(intent);
-                }
-            }
-        };
-
-        SimpleItemRecyclerViewAdapter(ItemListActivity parent,
-                                      List<Movies> items,
-                                      boolean twoPane) {
-            mValues = items;
-            mParentActivity = parent;
-            mTwoPane = twoPane;
-        }
-
-        @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.item_list_content, parent, false);
-            return new ViewHolder(view);
-        }
-
-        @Override
-        public void onBindViewHolder(final ViewHolder holder, int position) {
-            holder.mIdView.setText(mValues.get(position).getTitle());
-            holder.mContentView.setText(mValues.get(position).getOverview());
-            Picasso.get()
-                    .load("https://image.tmdb.org/t/p/original" + mValues.get(position).getBackdropPath())
-                    .into(holder.imageView);
-            holder.itemView.setTag(mValues.get(position));
-            holder.itemView.setOnClickListener(mOnClickListener);
-        }
-
-        @Override
-        public int getItemCount() {
-            return mValues.size();
-        }
-
-        class ViewHolder extends RecyclerView.ViewHolder {
-            final ImageView imageView;
-            final TextView mIdView;
-            final TextView mContentView;
-
-            ViewHolder(View view) {
-                super(view);
-                imageView = (ImageView) view.findViewById(R.id.imageId);
-                mIdView = (TextView) view.findViewById(R.id.id_text);
-                mContentView = (TextView) view.findViewById(R.id.content);
-
-            }
-        }
-    }
 }

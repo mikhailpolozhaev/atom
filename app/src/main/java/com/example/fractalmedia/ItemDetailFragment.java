@@ -15,7 +15,7 @@ import com.example.fractalmedia.model.Genres;
 import com.example.fractalmedia.model.Languages;
 import com.example.fractalmedia.model.Movie;
 import com.example.fractalmedia.retrofit.ApiClient;
-import com.example.fractalmedia.retrofit.TMDBService;
+import com.example.fractalmedia.services.TMDBService;
 import com.squareup.picasso.Picasso;
 
 import butterknife.BindView;
@@ -80,20 +80,20 @@ public class ItemDetailFragment extends Fragment {
                     mItem = response.body();
 
                     Picasso.get()
-                            .load("https://image.tmdb.org/t/p/original" + mItem.getBackdropPath())
+                            .load(ApiClient.URL_IMG + mItem.getBackdropPath())
                             .into(imagen);
                     titleTextView.setText(mItem.getTitle());
                     detailTextView.setText(mItem.getOverview());
                     popularityTextView.setText(String.valueOf(mItem.getPopularity()));
-                    genresTextView.setText(Genres.getGenresWithDelimiter(mItem.getGenres(),
+                    genresTextView.setText(Genres.convertListToCommaValues(mItem.getGenres(),
                             SEPARATOR));
                     budgetTextView.setText(String.valueOf(mItem.getBudget()));
                     statusTextView.setText(mItem.getStatus());
                     languageTextView.setText(
-                            Languages.getLanguagesWithDelimiter(mItem.getSpokenLanguages(), SEPARATOR)
+                            Languages.convertListToCommaValues(mItem.getSpokenLanguages(), SEPARATOR)
                     );
                     companiesTextView.setText(
-                            Companies.getCompaniesWithDelimiter(mItem.getProductionCompanies(),
+                            Companies.convertListToCommaValues(mItem.getProductionCompanies(),
                                     SEPARATOR)
                     );
                 }
@@ -111,9 +111,7 @@ public class ItemDetailFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.item_detail, container, false);
-
         unbinder = ButterKnife.bind(this, rootView);
-
         return rootView;
     }
 

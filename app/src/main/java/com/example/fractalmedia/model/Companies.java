@@ -48,7 +48,7 @@ public class Companies {
         this.originCountry = originCountry;
     }
 
-    public static String getCompaniesWithDelimiter(List<Companies> list, final String separator) {
+    public static String convertListToCommaValues(List<Companies> list, final String separator) {
 
         if (list == null || list.isEmpty()) {
             return "";

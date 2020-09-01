@@ -28,7 +28,7 @@ public class Languages {
         this.name = name;
     }
 
-    public static String getLanguagesWithDelimiter(List<Languages> list, final String separator) {
+    public static String convertListToCommaValues(List<Languages> list, final String separator) {
         if (list == null || list.isEmpty()) {
             return "";
         }
